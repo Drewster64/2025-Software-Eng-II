@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// REGISTRAR USUARIO
+// register user
 document.getElementById("register-btn").addEventListener("click", async () => {
   const name = document.getElementById("signup-name").value;
   const email = document.getElementById("signup-email").value;
@@ -25,7 +25,7 @@ document.getElementById("register-btn").addEventListener("click", async () => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Guardar usuario en Firestore
+    // store user
     await setDoc(doc(db, "users", user.uid), {
       name: name,
       email: email,
@@ -39,7 +39,7 @@ document.getElementById("register-btn").addEventListener("click", async () => {
   }
 });
 
-// INICIAR SESIÓN
+//user login
 document.getElementById("login-btn").addEventListener("click", async () => {
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
