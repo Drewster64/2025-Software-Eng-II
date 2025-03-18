@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// register user
+// REGISTRO DE USUARIO (NO REDIRIGE)
 document.getElementById("register-btn").addEventListener("click", async () => {
   const name = document.getElementById("signup-name").value;
   const email = document.getElementById("signup-email").value;
@@ -25,28 +25,28 @@ document.getElementById("register-btn").addEventListener("click", async () => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // store user
     await setDoc(doc(db, "users", user.uid), {
       name: name,
       email: email,
       createdAt: new Date()
     });
 
-    alert("¡Usuario registrado con éxito!");
+    alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
   } catch (error) {
     console.error("Error en el registro:", error);
     alert("Error: " + error.message);
   }
 });
 
-//user login
+// INICIO DE SESIÓN (REDIRIGE AL INDEX)
 document.getElementById("login-btn").addEventListener("click", async () => {
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    alert("¡Inicio de sesión exitoso!");
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("¡Inicio de sesión exitoso! Redirigiendo...");
+    window.location.href = "index.html"; // 🔹 Solo redirige al iniciar sesión
   } catch (error) {
     console.error("Error en el inicio de sesión:", error);
     alert("Error: " + error.message);
