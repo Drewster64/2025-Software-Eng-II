@@ -68,8 +68,8 @@ body {
 }
 /* Asegura que las imágenes tengan el mismo tamaño */
 .carousel-inner img {
-  width: 500px;
-  height: 500px;
+  width: 600;
+  height: 600;
   object-fit: cover; /* Asegura que la imagen no se distorsione */
   border-radius: 10px; /* Para bordes redondeados */
 }

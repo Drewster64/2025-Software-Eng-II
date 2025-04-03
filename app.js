@@ -13,13 +13,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig); 
 const db = getFirestore(app); // Inicializar Firestore
 
-// carrusel
+// 📌 Función para cargar artistas en el carrusel desde Firestore
 async function cargarArtistas() {
     console.log("🔄 Cargando artistas desde Firestore...");
   
-    const artistasRef = collection(db, "artistas"); //obtiene coleccion de artistas de firebase
-    const snapshot = await getDocs(artistasRef);// ve los artistas uno por uno
-    const carouselInner = document.querySelector(".carousel-inner");//busca el carrusel en el index
+    const artistasRef = collection(db, "artistas"); // Obtiene colección de artistas de Firebase
+    const snapshot = await getDocs(artistasRef); // Ve los artistas uno por uno
+    const carouselInner = document.querySelector(".carousel-inner"); // Busca el carrusel en el index
   
     if (!carouselInner) {
         console.error("⚠️ No se encontró el elemento .carousel-inner en el HTML.");
@@ -33,8 +33,7 @@ async function cargarArtistas() {
         const artista = doc.data();
         console.log("✅ Artista encontrado:", artista);
 
-        //esta seccion marca el artista como activo y obtiene todos sus datos desde firebase
-  
+        // Esta sección marca el artista como activo y obtiene todos sus datos desde Firebase
         if (!artista.image || !artista.name) {
             console.warn("⚠️ Documento inválido en artistas:", doc.id, artista);
             return;
@@ -48,17 +47,19 @@ async function cargarArtistas() {
         }
   
         item.innerHTML = `
-            <img src="${artista.image}" alt="${artista.name}" class="d-block mx-auto img-fluid rounded">
-            <div class="carousel-caption">
-                <h3 class="text-center fw-bolder text-white">${artista.name}</h3>
+            <div class="d-flex flex-column align-items-center">
+                <img src="${artista.image}" alt="${artista.name}" class="d-block mx-auto img-fluid rounded" style="width: 500px; height: 500px; object-fit: cover;">
+                <div class="mt-2">
+                    <span class="btn fw-bold" style="color: black; font-size: 185%">${artista.name}</span>
+                </div>
             </div>
         `;
   
-        carouselInner.appendChild(item);//agrega el artista al carrusel
+        carouselInner.appendChild(item); // Agrega el artista al carrusel
     });
   
     console.log("🎉 Carrusel actualizado con los artistas.");
 }
   
-// Ejecutar la funcion al cargar la página
+// Ejecutar la función al cargar la página
 document.addEventListener("DOMContentLoaded", cargarArtistas);
