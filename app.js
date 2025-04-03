@@ -1,54 +1,64 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC8OziYZn9iiiIH19SfXf1tw6UOoYA1apA",
-  authDomain: "try1-8c82b.firebaseapp.com",
-  projectId: "try1-8c82b",
-  storageBucket: "try1-8c82b.appspot.com",
-  messagingSenderId: "722840528217",
-  appId: "1:722840528217:web:85547781c2230e8b1d5848"
+    apiKey: "AIzaSyC8OziYZn9iiiIH19SfXf1tw6UOoYA1apA",
+    authDomain: "try1-8c82b.firebaseapp.com",
+    projectId: "try1-8c82b",
+    storageBucket: "try1-8c82b.appspot.com",
+    messagingSenderId: "722840528217",
+    appId: "1:722840528217:web:85547781c2230e8b1d5848"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app = initializeApp(firebaseConfig); 
+const db = getFirestore(app); // Inicializar Firestore
 
-// REGISTRO DE USUARIO (NO REDIRIGE)
-document.getElementById("register-btn").addEventListener("click", async () => {
-  const name = document.getElementById("signup-name").value;
-  const email = document.getElementById("signup-email").value;
-  const password = document.getElementById("signup-password").value;
+// carrusel
+async function cargarArtistas() {
+    console.log("🔄 Cargando artistas desde Firestore...");
+  
+    const artistasRef = collection(db, "artistas"); //obtiene coleccion de artistas de firebase
+    const snapshot = await getDocs(artistasRef);// ve los artistas uno por uno
+    const carouselInner = document.querySelector(".carousel-inner");//busca el carrusel en el index
+  
+    if (!carouselInner) {
+        console.error("⚠️ No se encontró el elemento .carousel-inner en el HTML.");
+        return;
+    }
+  
+    let first = true;
+    carouselInner.innerHTML = ""; 
+  
+    snapshot.forEach((doc) => {
+        const artista = doc.data();
+        console.log("✅ Artista encontrado:", artista);
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    await setDoc(doc(db, "users", user.uid), {
-      name: name,
-      email: email,
-      createdAt: new Date()
+        //esta seccion marca el artista como activo y obtiene todos sus datos desde firebase
+  
+        if (!artista.image || !artista.name) {
+            console.warn("⚠️ Documento inválido en artistas:", doc.id, artista);
+            return;
+        }
+  
+        const item = document.createElement("div");
+        item.classList.add("carousel-item");
+        if (first) {
+            item.classList.add("active");
+            first = false;
+        }
+  
+        item.innerHTML = `
+            <img src="${artista.image}" alt="${artista.name}" class="d-block mx-auto img-fluid rounded">
+            <div class="carousel-caption">
+                <h3 class="text-center fw-bolder text-white">${artista.name}</h3>
+            </div>
+        `;
+  
+        carouselInner.appendChild(item);//agrega el artista al carrusel
     });
-
-    alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
-  } catch (error) {
-    console.error("Error en el registro:", error);
-    alert("Error: " + error.message);
-  }
-});
-
-// INICIO DE SESIÓN (REDIRIGE AL INDEX)
-document.getElementById("login-btn").addEventListener("click", async () => {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("¡Inicio de sesión exitoso! Redirigiendo...");
-    window.location.href = "index.html"; // 🔹 Solo redirige al iniciar sesión
-  } catch (error) {
-    console.error("Error en el inicio de sesión:", error);
-    alert("Error: " + error.message);
-  }
-});
+  
+    console.log("🎉 Carrusel actualizado con los artistas.");
+}
+  
+// Ejecutar la funcion al cargar la página
+document.addEventListener("DOMContentLoaded", cargarArtistas);

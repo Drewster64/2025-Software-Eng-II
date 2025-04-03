@@ -60,4 +60,32 @@ body {
     text-decoration: none;
     font-weight: bold;
   }
-  
+  .navbar-space {
+    padding-top: 100px; 
+} 
+.navcolor {
+  background-color: lightgrey;
+}
+/* Asegura que las imágenes tengan el mismo tamaño */
+.carousel-inner img {
+  width: 500px;
+  height: 500px;
+  object-fit: cover; /* Asegura que la imagen no se distorsione */
+  border-radius: 10px; /* Para bordes redondeados */
+}
+
+
+/* Centrar el contenido del carrusel */
+.carousel-item-content {
+  text-align: center;
+}
+
+/* Estilo para el nombre debajo de la imagen */
+.carousel-caption {
+  padding: 10px 0;
+}
+
+.carousel-caption h3 {
+  font-size: 1.7rem; /* Ajustar tamaño del texto */
+  margin: 0;
+}
