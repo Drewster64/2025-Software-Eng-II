@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/minty/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="./styles.css">
+
+    <script type="module" src="./app.js" defer></script>  
+    <script>
+        window.location.href = "registro.html";
+    </script> 
+
+</head>
+<body class="bg-primary navbar-space back">
+    <div class="container-lg">
+
+        <nav class="navbar navbar-expand-lg navbar-light navcolor fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#home">
+                    <img class="rounded" src="./images/logo1.webp" alt="Bootstrap" width="80" height="80">
+                </a>
+                <a class="navbar-brand bi bi-chevron-double-up text" href="#home"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link active" aria-current="page" href="#home"><b><h4 class="text-dark fw-bolder">Home</h4></b></a>
+                        <a class="nav-link" href="#artistas"><b><h4 class="text-dark fw-bolder">Nuestros Artistas</h4></b></a>
+                        <a class="nav-link" href="#albumline"><b><h4 class="text-dark fw-bolder">Albumes</h4></b></a>
+                        <a class="nav-link" href="#soon"><b><h4 class="text-dark fw-bolder">Comingo Soon...</h4></b></a>
+                        <form id="search-form" class="d-flex align-items-center ms-3" role="search">
+                            <input type="search" id="search-input" class="form-control" placeholder="Busca una canción..." required>
+                            <button class="btn btn-info" type="submit"><i class="bi bi-search"></i></button>
+                          </form>                          
+                        
+                   
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <section id="home" class="mt-5">
+
+            <h1 class="animate__animated animate__heartBeat fw-bolder text-dark fw-bolder text-center ">
+                Track by Track
+            </h1> 
+            <h3 class="animate__animated animate__heartBeat fw-bolder text-dark text-center ">
+                ¡Realiza las reseñas musicales que desees!
+            </h3>
+
+        </section>
+
+        <section id="artistas">
+
+            <h2 class="text-dark fw-bolder">Nuestros Artistas</h2>
+
+            <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </section>
+        
+    </div>
+
+   
+</body>
+</html>

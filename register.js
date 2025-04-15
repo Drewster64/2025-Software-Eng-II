@@ -54,7 +54,7 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
     alert("¡Inicio de sesión exitoso! Redirigiendo...");
-    window.location.href = "index.html"; // 🔹 Solo redirige al iniciar sesión
+    window.location.href = "home.html"; // 🔹 Solo redirige al iniciar sesión
   } catch (error) {
     console.error("Error en el inicio de sesión:", error);
     alert("Error: " + error.message);
