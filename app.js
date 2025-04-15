@@ -60,6 +60,23 @@ async function cargarArtistas() {
   
     console.log("🎉 Carrusel actualizado con los artistas.");
 }
+
+// Función de búsqueda
+function buscarCancion() {
+    const searchInput = document.getElementById("search-input"); // Obtén el campo de búsqueda
+    const query = searchInput.value.trim(); // Obtén el valor ingresado en el campo de búsqueda
   
+    if (query) {
+        // Redirige a la página de detalles de la canción con el nombre de la canción como parámetro
+        window.location.href = `/songs.html?nombre=${encodeURIComponent(query)}`;
+    }
+}
+
+// Escucha el evento del formulario de búsqueda
+document.getElementById("search-form").addEventListener("submit", function(e) {
+    e.preventDefault(); // Prevenir la acción por defecto del formulario (recarga de página)
+    buscarCancion(); // Ejecutar la búsqueda
+});
+
 // Ejecutar la función al cargar la página
 document.addEventListener("DOMContentLoaded", cargarArtistas);

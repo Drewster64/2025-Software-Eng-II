@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="./styles.css">
 
+    <script type="module" src="./app.js" defer></script>   
+
 </head>
 <body class="bg-primary navbar-space back">
     <div class="container-lg">
@@ -30,6 +32,12 @@
                         <a class="nav-link" href="#artistas"><b><h4 class="text-dark fw-bolder">Nuestros Artistas</h4></b></a>
                         <a class="nav-link" href="#albumline"><b><h4 class="text-dark fw-bolder">Albumes</h4></b></a>
                         <a class="nav-link" href="#soon"><b><h4 class="text-dark fw-bolder">Comingo Soon...</h4></b></a>
+                        <form id="search-form" class="d-flex align-items-center ms-3" role="search">
+                            <input type="search" id="search-input" class="form-control" placeholder="Busca una canción..." required>
+                            <button class="btn btn-info" type="submit"><i class="bi bi-search"></i></button>
+                          </form>                          
+                        
+                   
                     </div>
                 </div>
             </div>
@@ -67,7 +75,5 @@
     </div>
 
    
-
-    <script type="module" src="./app.js"></script>
 </body>
 </html>

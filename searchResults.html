@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Búsqueda</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/minty/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="bg-primary navbar-space back">
+
+    <div class="container-lg">
+        <nav class="navbar navbar-expand-lg navbar-light navcolor fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/index.html">
+                    <img class="rounded" src="./images/logo1.webp" alt="Logo" width="80" height="80">
+                </a>
+                <a class="navbar-brand bi bi-chevron-double-up text" href="#home"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link active" aria-current="page" href="/index.html"><b><h4 class="text-dark fw-bolder">Home</h4></b></a>
+                        <form id="search-form" class="d-flex align-items-center ms-3" role="search">
+                            <div class="input-group">
+                                <input
+                                    type="search"
+                                    id="search-input"
+                                    class="form-control"
+                                    placeholder="Buscar..."
+                                    aria-label="Buscar"
+                                    required
+                                >
+                                <button class="btn btn-info" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-5">
+            <h1>Resultados de Búsqueda para: <span id="search-query"></span></h1>
+
+            <div id="resultados-artistas" class="mt-4">
+                <h2>Artistas</h2>
+                <div class="row" id="artist-results">
+                    <!-- Aquí se llenarán los resultados de los artistas -->
+                </div>
+            </div>
+
+            <div id="resultados-albumes" class="mt-4">
+                <h2>Álbumes</h2>
+                <div class="row" id="album-results">
+                    <!-- Aquí se llenarán los resultados de los álbumes -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Firebase y archivo de resultados -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+        <script src="results.js"></script>
+    </div>
+</body>
+</html>
