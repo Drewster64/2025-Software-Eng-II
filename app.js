@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyC8OziYZn9iiiIH19SfXf1tw6UOoYA1apA",
@@ -11,15 +12,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig); 
-const db = getFirestore(app); // Inicializar Firestore
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 // 📌 Función para cargar artistas en el carrusel desde Firestore
 async function cargarArtistas() {
     console.log("🔄 Cargando artistas desde Firestore...");
   
-    const artistasRef = collection(db, "artistas"); // Obtiene colección de artistas de Firebase
-    const snapshot = await getDocs(artistasRef); // Ve los artistas uno por uno
-    const carouselInner = document.querySelector(".carousel-inner"); // Busca el carrusel en el index
+    const artistasRef = collection(db, "artistas");
+    const snapshot = await getDocs(artistasRef);
+    const carouselInner = document.querySelector(".carousel-inner");
   
     if (!carouselInner) {
         console.error("⚠️ No se encontró el elemento .carousel-inner en el HTML.");
@@ -33,7 +35,6 @@ async function cargarArtistas() {
         const artista = doc.data();
         console.log("✅ Artista encontrado:", artista);
 
-        // Esta sección marca el artista como activo y obtiene todos sus datos desde Firebase
         if (!artista.image || !artista.name) {
             console.warn("⚠️ Documento inválido en artistas:", doc.id, artista);
             return;
@@ -55,28 +56,43 @@ async function cargarArtistas() {
             </div>
         `;
   
-        carouselInner.appendChild(item); // Agrega el artista al carrusel
+        carouselInner.appendChild(item);
     });
   
     console.log("🎉 Carrusel actualizado con los artistas.");
 }
 
-// Función de búsqueda
+// 🔍 Función de búsqueda
 function buscarCancion() {
-    const searchInput = document.getElementById("search-input"); // Obtén el campo de búsqueda
-    const query = searchInput.value.trim(); // Obtén el valor ingresado en el campo de búsqueda
+    const searchInput = document.getElementById("search-input");
+    const query = searchInput.value.trim();
   
     if (query) {
-        // Redirige a la página de detalles de la canción con el nombre de la canción como parámetro
         window.location.href = `/songs.html?nombre=${encodeURIComponent(query)}`;
     }
 }
 
-// Escucha el evento del formulario de búsqueda
+// 🎯 Escucha el evento del formulario de búsqueda
 document.getElementById("search-form").addEventListener("submit", function(e) {
-    e.preventDefault(); // Prevenir la acción por defecto del formulario (recarga de página)
-    buscarCancion(); // Ejecutar la búsqueda
+    e.preventDefault();
+    buscarCancion();
 });
 
-// Ejecutar la función al cargar la página
-document.addEventListener("DOMContentLoaded", cargarArtistas);
+// 🔓 Cerrar sesión (Logout)
+document.addEventListener("DOMContentLoaded", () => {
+    cargarArtistas(); // Ejecuta la carga de artistas al cargar la página
+
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+            try {
+                await signOut(auth);
+                alert("Sesión cerrada exitosamente.");
+                window.location.href = "index.html"; // Redirige a tu página de login
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+                alert("Error al cerrar sesión.");
+            }
+        });
+    }
+});

@@ -32,11 +32,16 @@
                         <a class="nav-link" href="#artistas"><b><h4 class="text-dark fw-bolder">Nuestros Artistas</h4></b></a>
                         <a class="nav-link" href="#albumline"><b><h4 class="text-dark fw-bolder">Albumes</h4></b></a>
                         <a class="nav-link" href="#soon"><b><h4 class="text-dark fw-bolder">Coming Soon...</h4></b></a>
-                        <form id="search-form" class="d-flex align-items-center ms-3" role="search">
-                            <input type="search" id="search-input" class="form-control" placeholder="Busca una canción..." required>
-                            <button class="btn btn-info" type="submit"><i class="bi bi-search"></i></button>
-                          </form>                          
-                        
+                        <div class="d-flex flex-column align-items-center w-100 mt-3">
+                            <form id="search-form" class="d-flex align-items-center mb-2" role="search">
+                              <input type="search" id="search-input" class="form-control me-2" placeholder="Busca una canción..." required>
+                              <button class="btn btn-info" type="submit"><i class="bi bi-search"></i></button>
+                            </form>  
+                          
+                            <button id="logout-btn" class="btn btn-danger">
+                              <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </button>
+                          </div>                 
                    
                     </div>
                 </div>
