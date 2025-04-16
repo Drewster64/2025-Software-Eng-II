@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// 📌 Función para cargar artistas en el carrusel desde Firestore
+//carga los artistas en el carrusel desde Firestore
 async function cargarArtistas() {
     console.log("🔄 Cargando artistas desde Firestore...");
   
@@ -59,10 +59,10 @@ async function cargarArtistas() {
         carouselInner.appendChild(item);
     });
   
-    console.log("🎉 Carrusel actualizado con los artistas.");
+    console.log("Carrusel actualizado con los artistas.");
 }
 
-// 🔍 Función de búsqueda
+// busqueda de cancion (no funcionando as of 4/15/25)
 function buscarCancion() {
     const searchInput = document.getElementById("search-input");
     const query = searchInput.value.trim();
@@ -72,13 +72,13 @@ function buscarCancion() {
     }
 }
 
-// 🎯 Escucha el evento del formulario de búsqueda
+// 🎯 Escucha el evento del formulario de búsqueda (no funcionando as of 4/15/25)
 document.getElementById("search-form").addEventListener("submit", function(e) {
     e.preventDefault();
     buscarCancion();
 });
 
-// 🔓 Cerrar sesión (Logout)
+// logout utilizando authentication de firestore
 document.addEventListener("DOMContentLoaded", () => {
     cargarArtistas(); // Ejecuta la carga de artistas al cargar la página
 
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await signOut(auth);
                 alert("Sesión cerrada exitosamente.");
-                window.location.href = "index.html"; // Redirige a tu página de login
+                window.location.href = "index.html"; // Redirige a register.html
             } catch (error) {
                 console.error("Error al cerrar sesión:", error);
                 alert("Error al cerrar sesión.");
