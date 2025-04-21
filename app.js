@@ -62,14 +62,18 @@ async function cargarArtistas() {
     console.log("Carrusel actualizado con los artistas.");
 }
 
-// busqueda de canción
 function buscarCancion() {
     const searchInput = document.getElementById("search-input");
     const query = searchInput.value.trim();
 
     if (query) {
-        // Redirigir a la página de canciones con la query
-        window.location.href = `/songs/songs.html?nombre=${encodeURIComponent(query)}`;
+        // Detectar el path base actual (útil para GitHub Pages)
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.includes("/2025-Software-Eng-II")
+            ? "/2025-Software-Eng-II"
+            : "";
+
+        window.location.href = `${basePath}/songs/songs.html?nombre=${encodeURIComponent(query)}`;
     }
 }
 
