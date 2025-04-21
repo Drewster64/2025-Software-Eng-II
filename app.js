@@ -51,7 +51,7 @@ async function cargarArtistas() {
             <div class="d-flex flex-column align-items-center">
                 <img src="${artista.image}" alt="${artista.name}" class="d-block mx-auto img-fluid rounded" style="width: 500px; height: 500px; object-fit: cover;">
                 <div class="mt-2">
-                    <span class="btn fw-bold" style="color: black; font-size: 185%">${artista.name}</span>
+                    <span class="btn fw-bold" style="color: white; font-size: 185%">${artista.name}</span>
                 </div>
             </div>
         `;
