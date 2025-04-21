@@ -89,4 +89,19 @@ body {
   font-size: 1.7rem; /* Ajustar tamaño del texto */
   margin: 0;
 }
+body.page {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url("https://w0.peakpx.com/wallpaper/710/985/HD-wallpaper-vinyl-disk-vinyl-music.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  text-align: center;
+}
+.content {
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  max-width: 600px;
+  margin: 100px auto;
+  border-radius: 12px;
+}
 
