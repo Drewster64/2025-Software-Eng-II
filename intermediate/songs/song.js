@@ -17,7 +17,7 @@ const db = getFirestore(app);
 
 // Obtener el nombre de la canción desde la URL
 const urlParams = new URLSearchParams(window.location.search);
-const nombreCancion = urlParams.get("nombre");
+const nombreCancion = urlParams.get("nombre")?.toLowerCase(); // Convertimos a minúsculas
 
 // Función para mostrar la información de la canción
 async function mostrarCancion() {
@@ -27,7 +27,7 @@ async function mostrarCancion() {
   }
 
   const cancionesRef = collection(db, "songs");
-  const q = query(cancionesRef, where("title", "==", nombreCancion));
+  const q = query(cancionesRef);
 
   try {
     const cancionesSnap = await getDocs(q);
@@ -42,7 +42,8 @@ async function mostrarCancion() {
 
     cancionesSnap.forEach((doc) => {
       const data = doc.data();
-      if (data.title.toLowerCase() === nombreCancion.toLowerCase()) {
+      // Convertir título de la canción a minúsculas para comparación insensible a mayúsculas
+      if (data.title?.toLowerCase() === nombreCancion) {
         cancionEncontrada = { id: doc.id, ...data };
       }
     });

@@ -37,15 +37,13 @@ async function mostrarCanciones() {
   const contenedor = document.getElementById("canciones-container");
   contenedor.innerHTML = "<h2 class='text-white'>Canciones</h2>";
 
-  let cancionesEncontradas = false; // Variable para verificar si se encontraron canciones
+  let cancionesEncontradas = false;
 
-  // Iterar sobre todas las canciones
   for (const docSnap of snapshot.docs) {
     const cancion = docSnap.data();
     if (cancion.title?.toLowerCase().includes(nombreBuscado)) {
-      cancionesEncontradas = true; // Se encontró al menos una canción que coincide
+      cancionesEncontradas = true;
 
-      // Obtener el cover del álbum relacionado
       const coverUrl = await obtenerCoverAlbum(cancion.albumId);
 
       const card = document.createElement("div");
@@ -57,7 +55,6 @@ async function mostrarCanciones() {
              style="max-width: 200px; cursor: pointer;">
         <h3 class="mt-2 fw-bold text-white">${cancion.title}</h3>
       `;
-      // Al hacer click en el cover, redirige a songs.html
       card.querySelector("img").addEventListener("click", () => {
         window.location.href = `songs/songs.html?nombre=${encodeURIComponent(cancion.title)}`;
       });
@@ -65,7 +62,6 @@ async function mostrarCanciones() {
     }
   }
 
-  // Si no se encontraron canciones que coincidan
   if (!cancionesEncontradas) {
     const noEncontrado = document.createElement("h3");
     noEncontrado.className = "text-white";
@@ -82,32 +78,36 @@ async function mostrarAlbumes() {
   const contenedor = document.getElementById("albumes-container");
   contenedor.innerHTML = "<h2 class='text-white'>Álbumes</h2>";
 
-  let encontrado = false; // Variable para verificar si se encontraron álbumes
+  let encontrado = false;
 
   snapshot.forEach((doc) => {
     const album = doc.data();
-    if (album.name?.toLowerCase().includes(nombreBuscado)) {
-      encontrado = true; // Se encontró al menos un álbum
+    const albumTitle = album.title?.toLowerCase() || '';
+
+    if (albumTitle.includes(nombreBuscado)) {
+      encontrado = true;
+
       const card = document.createElement("div");
       card.className = "text-center m-3";
 
-      // Verificar si el cover está disponible, de lo contrario asignar la imagen predeterminada
       const coverUrl = album.cover && album.cover.trim() !== "" 
                       ? album.cover 
                       : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
 
       card.innerHTML = `
         <img src="${coverUrl}" 
-             alt="${album.name}" 
+             alt="${album.title}" 
              class="img-fluid rounded shadow" 
-             style="max-width: 200px;">
-        <h3 class="mt-2 fw-bold text-white">${album.name}</h3>
+             style="max-width: 200px; cursor: pointer;">
+        <h3 class="mt-2 fw-bold text-white">${album.title}</h3>
       `;
+      card.querySelector("img").addEventListener("click", () => {
+        window.location.href = `album/album.html?nombre=${encodeURIComponent(album.title)}`;
+      });
       contenedor.appendChild(card);
     }
   });
 
-  // Si no se encontró ningún álbum que coincida con la búsqueda
   if (!encontrado) {
     const noEncontrado = document.createElement("h3");
     noEncontrado.className = "text-white";
