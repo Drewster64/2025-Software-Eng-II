@@ -29,6 +29,52 @@ async function obtenerCoverAlbum(albumId) {
   return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
 }
 
+// Mostrar artistas
+async function mostrarArtistas() {
+  const artistasRef = collection(db, "artistas");
+  const snapshot = await getDocs(artistasRef);
+
+  const contenedor = document.getElementById("artistas-container");
+  contenedor.innerHTML = "<h2 class='text-white'>Artistas</h2>";
+
+  let artistasEncontrados = false;
+
+  snapshot.forEach((doc) => {
+    const artista = doc.data();
+    const artistaName = artista.name?.toLowerCase() || '';
+
+    if (artistaName.includes(nombreBuscado)) {
+      artistasEncontrados = true;
+
+      const card = document.createElement("div");
+      card.className = "text-center m-3";
+
+      const imageUrl = artista.image && artista.image.trim() !== "" 
+                      ? artista.image 
+                      : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
+
+      card.innerHTML = `
+        <img src="${imageUrl}" 
+             alt="${artista.name}" 
+             class="img-fluid rounded shadow" 
+             style="max-width: 200px; cursor: pointer;">
+        <h3 class="mt-2 fw-bold text-white">${artista.name}</h3>
+      `;
+      card.querySelector("img").addEventListener("click", () => {
+        window.location.href = `artists/artists.html?nombre=${encodeURIComponent(artista.name)}`;
+      });
+      contenedor.appendChild(card);
+    }
+  });
+
+  if (!artistasEncontrados) {
+    const noEncontrado = document.createElement("h3");
+    noEncontrado.className = "text-white";
+    noEncontrado.textContent = "No se encontraron artistas que coincidan con ese nombre.";
+    contenedor.appendChild(noEncontrado);
+  }
+}
+
 // Mostrar canciones
 async function mostrarCanciones() {
   const cancionesRef = collection(db, "songs");
@@ -118,6 +164,7 @@ async function mostrarAlbumes() {
 
 // Ejecutar funciones al cargar
 document.addEventListener("DOMContentLoaded", () => {
+  mostrarArtistas();
   mostrarCanciones();
   mostrarAlbumes();
 });
