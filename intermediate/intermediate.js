@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -15,61 +15,108 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Obtener el parámetro de búsqueda desde la URL
+// Obtener parámetro de búsqueda de la URL
 const params = new URLSearchParams(window.location.search);
 const nombreBuscado = params.get("nombre")?.toLowerCase() || "";
 
-// Función para mostrar las canciones
+// Función para obtener el cover del álbum
+async function obtenerCoverAlbum(albumId) {
+  const albumRef = doc(db, "album", albumId);
+  const albumSnap = await getDoc(albumRef);
+  if (albumSnap.exists()) {
+    return albumSnap.data().cover || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
+  }
+  return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
+}
+
+// Mostrar canciones
 async function mostrarCanciones() {
-  const cancionesRef = collection(db, "songs"); // 🔥 Aquí cambiamos a "songs"
+  const cancionesRef = collection(db, "songs");
   const snapshot = await getDocs(cancionesRef);
 
   const contenedor = document.getElementById("canciones-container");
-  contenedor.innerHTML = "<h2 class='text-dark'>Canciones</h2>";
+  contenedor.innerHTML = "<h2 class='text-white'>Canciones</h2>";
 
-  snapshot.forEach((doc) => {
-    const cancion = doc.data();
+  let cancionesEncontradas = false; // Variable para verificar si se encontraron canciones
+
+  // Iterar sobre todas las canciones
+  for (const docSnap of snapshot.docs) {
+    const cancion = docSnap.data();
     if (cancion.title?.toLowerCase().includes(nombreBuscado)) {
-      const card = document.createElement("div");
-      card.className = "col-md-3 text-center";
+      cancionesEncontradas = true; // Se encontró al menos una canción que coincide
 
+      // Obtener el cover del álbum relacionado
+      const coverUrl = await obtenerCoverAlbum(cancion.albumId);
+
+      const card = document.createElement("div");
+      card.className = "text-center m-3";
       card.innerHTML = `
-        <img src="${cancion.cover}" alt="${cancion.title}" class="img-fluid rounded shadow" style="max-width: 200px; cursor: pointer;">
-        <p class="mt-2 fw-bold text-dark">${cancion.title}</p>
+        <img src="${coverUrl}" 
+             alt="${cancion.title}" 
+             class="img-fluid rounded shadow" 
+             style="max-width: 200px; cursor: pointer;">
+        <h3 class="mt-2 fw-bold text-white">${cancion.title}</h3>
       `;
-      // Redirigir al hacer clic en la imagen
+      // Al hacer click en el cover, redirige a songs.html
       card.querySelector("img").addEventListener("click", () => {
         window.location.href = `songs/songs.html?nombre=${encodeURIComponent(cancion.title)}`;
       });
       contenedor.appendChild(card);
     }
-  });
+  }
+
+  // Si no se encontraron canciones que coincidan
+  if (!cancionesEncontradas) {
+    const noEncontrado = document.createElement("h3");
+    noEncontrado.className = "text-white";
+    noEncontrado.textContent = "No se encontraron canciones que coincidan con ese título.";
+    contenedor.appendChild(noEncontrado);
+  }
 }
 
-// Función para mostrar los álbumes
+// Mostrar álbumes
 async function mostrarAlbumes() {
-  const albumesRef = collection(db, "album"); // 🔥 También corregido (no "álbumes", sino "album")
+  const albumesRef = collection(db, "album");
   const snapshot = await getDocs(albumesRef);
 
   const contenedor = document.getElementById("albumes-container");
-  contenedor.innerHTML = "<h2 class='text-dark'>Álbumes</h2>";
+  contenedor.innerHTML = "<h2 class='text-white'>Álbumes</h2>";
+
+  let encontrado = false; // Variable para verificar si se encontraron álbumes
 
   snapshot.forEach((doc) => {
     const album = doc.data();
     if (album.name?.toLowerCase().includes(nombreBuscado)) {
+      encontrado = true; // Se encontró al menos un álbum
       const card = document.createElement("div");
-      card.className = "col-md-3 text-center";
+      card.className = "text-center m-3";
+
+      // Verificar si el cover está disponible, de lo contrario asignar la imagen predeterminada
+      const coverUrl = album.cover && album.cover.trim() !== "" 
+                      ? album.cover 
+                      : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
 
       card.innerHTML = `
-        <img src="${album.cover}" alt="${album.name}" class="img-fluid rounded shadow" style="max-width: 200px;">
-        <p class="mt-2 fw-bold text-dark">${album.name}</p>
+        <img src="${coverUrl}" 
+             alt="${album.name}" 
+             class="img-fluid rounded shadow" 
+             style="max-width: 200px;">
+        <h3 class="mt-2 fw-bold text-white">${album.name}</h3>
       `;
       contenedor.appendChild(card);
     }
   });
+
+  // Si no se encontró ningún álbum que coincida con la búsqueda
+  if (!encontrado) {
+    const noEncontrado = document.createElement("h3");
+    noEncontrado.className = "text-white";
+    noEncontrado.textContent = "No se encontraron álbumes que coincidan con ese título.";
+    contenedor.appendChild(noEncontrado);
+  }
 }
 
-// Ejecutar las funciones al cargar la página
+// Ejecutar funciones al cargar
 document.addEventListener("DOMContentLoaded", () => {
   mostrarCanciones();
   mostrarAlbumes();
