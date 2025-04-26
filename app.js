@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-//carga los artistas en el carrusel desde Firestore
+// Cargar artistas en el carrusel desde Firestore
 async function cargarArtistas() {
     console.log("🔄 Cargando artistas desde Firestore...");
   
@@ -62,31 +62,31 @@ async function cargarArtistas() {
     console.log("Carrusel actualizado con los artistas.");
 }
 
+// 🔍 Redirigir a intermediate.html con la búsqueda
 function buscarCancion() {
     const searchInput = document.getElementById("search-input");
     const query = searchInput.value.trim();
 
     if (query) {
-        // Detectar el path base actual (útil para GitHub Pages)
         const currentPath = window.location.pathname;
         const basePath = currentPath.includes("/2025-Software-Eng-II")
             ? "/2025-Software-Eng-II"
             : "";
 
-        window.location.href = `${basePath}/songs/songs.html?nombre=${encodeURIComponent(query)}`;
+        // Redirige a intermediate.html en vez de songs.html
+        window.location.href = `${basePath}/intermediate/intermediate.html?nombre=${encodeURIComponent(query)}`;
     }
 }
 
-// Escucha el evento del formulario de búsqueda
+// Escuchar evento del formulario de búsqueda
 document.getElementById("search-form").addEventListener("submit", function(e) {
-    e.preventDefault();  // Evitar que el formulario se envíe de manera convencional
+    e.preventDefault();
     buscarCancion();
 });
 
-
-// logout utilizando authentication de firestore
+// 🔒 Logout con Firebase Auth
 document.addEventListener("DOMContentLoaded", () => {
-    cargarArtistas(); // Ejecuta la carga de artistas al cargar la página
+    cargarArtistas(); // Cargar artistas al iniciar
 
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) {
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 await signOut(auth);
                 alert("Sesión cerrada exitosamente.");
-                window.location.href = "index.html"; // Redirige a register.html
+                window.location.href = "index.html";
             } catch (error) {
                 console.error("Error al cerrar sesión:", error);
                 alert("Error al cerrar sesión.");
