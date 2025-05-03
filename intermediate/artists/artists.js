@@ -59,7 +59,7 @@ async function mostrarArtista() {
       contenedor.appendChild(card);
       encontrado = true; // Se ha encontrado el artista
     }
-  });
+  });//1
 
   // Si no se encuentra el artista
   if (!encontrado) {

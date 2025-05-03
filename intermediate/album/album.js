@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -32,19 +32,20 @@ async function cargarAlbum() {
   snapshot.forEach((docSnap) => {
     const album = docSnap.data();
 
-    // Convertir el título a minúsculas para hacer la comparación insensible a mayúsculas/minúsculas
     const albumTitleLower = album.title?.toLowerCase() || "";
     
     if (albumTitleLower === nombreAlbum) {
       encontrado = true;
 
+      const albumId = docSnap.id;  // Obtener ID del documento (necesario para las canciones)
+
       const coverUrl = album.cover && album.cover.trim() !== "" 
                       ? album.cover 
                       : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
 
-      // Aquí también nos aseguramos de que la descripción sea insensible al caso
       const descripcion = album.info || album.description || album.descripcion || "Sin descripción disponible.";
 
+      // Crear la card del álbum
       const card = document.createElement("div");
       card.className = "text-center m-3";
 
@@ -59,10 +60,17 @@ async function cargarAlbum() {
           >
           <h2 class="fw-bold text-white">${album.title}</h2>
           <p class="text-white mt-2 text-center">${descripcion}</p>
+          <div id="rating-container" class="d-flex justify-content-center align-items-center gap-2 mt-3">
+            <span id="album-rating" class="text-white fs-5">Calculando...</span>
+            <i class="bi bi-star-fill" style="color: gold;"></i>
+          </div>
         </div>
       `;
 
       contenedor.appendChild(card);
+
+      // Obtener las canciones del álbum
+      obtenerCancionesDelAlbum(albumId);
     }
   });
 
@@ -71,6 +79,42 @@ async function cargarAlbum() {
     noEncontrado.className = "text-white text-center";
     noEncontrado.textContent = "Álbum no encontrado.";
     contenedor.appendChild(noEncontrado);
+  }
+}
+
+// Función para obtener las canciones del álbum y calcular el promedio de calificación
+async function obtenerCancionesDelAlbum(albumId) {
+  const cancionesRef = collection(db, "songs");
+  const q = query(cancionesRef, where("albumId", "==", albumId));
+  
+  try {
+    const cancionesSnap = await getDocs(q);
+    let totalRating = 0;
+    let totalCanciones = 0;
+
+    for (const doc of cancionesSnap.docs) {
+      const cancion = doc.data();
+      const songId = doc.id;
+
+      const starsRef = collection(db, "stars");
+      const starQuery = query(starsRef, where("songId", "==", songId));
+      const starSnap = await getDocs(starQuery);
+
+      const ratings = starSnap.docs.map(doc => doc.data().rating);
+      
+      if (ratings.length > 0) {
+        const sum = ratings.reduce((acc, rating) => acc + rating, 0);
+        const averageRating = sum / ratings.length;
+        totalRating += averageRating;
+        totalCanciones++;
+      }
+    }
+
+    const promedioAlbum = totalCanciones > 0 ? totalRating / totalCanciones : 0;
+    document.getElementById("album-rating").innerText = promedioAlbum.toFixed(1);
+  } catch (error) {
+    console.error("Error al calcular el promedio de calificación del álbum:", error);
+    document.getElementById("album-rating").innerText = "Error";
   }
 }
 
