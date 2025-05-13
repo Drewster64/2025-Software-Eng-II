@@ -309,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("reviewer-name").value = user;
   }
 });
+
 // 🔍 Redirigir a intermediate.html con la búsqueda
 function buscarCancion() {
     const searchInput = document.getElementById("search-input");
@@ -330,5 +331,6 @@ document.getElementById("search-form").addEventListener("submit", function(e) {
     e.preventDefault();
     buscarCancion();
 });
+
 
 
