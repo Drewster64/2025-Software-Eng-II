@@ -13,10 +13,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
       <script>
         function redirigirAHome() {
-            const currentPath = window.location.pathname;
-            const basePath = currentPath.includes("/2025-Software-Eng-II") ? "/2025-Software-Eng-II" : "";
-            window.location.href = `${basePath}/home.html`;
-        }
+        const pathSegments = window.location.pathname.split("/");
+        const repoName = pathSegments.length > 1 ? pathSegments[1] : "";
+        const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+        const homeURL = isLocal
+        ? `${window.location.origin}/home.html`
+        : `${window.location.origin}/${repoName}/home.html`;
+
+        window.location.href = homeURL;
+}
+
+        
     </script>
 
     <style>
