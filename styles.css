@@ -96,6 +96,7 @@ body.page {
   background-size: cover;
   color: white;
   text-align: center;
+  padding-top:100px;
 }
 .content {
   background-color: rgba(0, 0, 0, 0.6);
@@ -121,5 +122,9 @@ body.page {
 .gallery img:hover {
   transform: scale(1.05);
 }
+section{
+  padding-top:100px;
+}
+
 
 

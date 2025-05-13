@@ -1,20 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  setDoc,
-  updateDoc,
-  orderBy,
-  increment,
-  arrayRemove,
-  arrayUnion,
-  serverTimestamp
+import { getFirestore, collection, doc, getDoc, query, where, getDocs, addDoc, setDoc, updateDoc, orderBy, increment, arrayRemove, arrayUnion, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Configuración de Firebase
@@ -323,4 +308,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (user) {
     document.getElementById("reviewer-name").value = user;
   }
+});
+// 🔍 Redirigir a intermediate.html con la búsqueda
+function buscarCancion() {
+    const searchInput = document.getElementById("search-input");
+    const query = searchInput.value.trim();
+
+    if (query) {
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.includes("/2025-Software-Eng-II")
+            ? "/2025-Software-Eng-II"
+            : "";
+
+        // Redirige a intermediate.html en vez de songs.html
+        window.location.href = `${basePath}/intermediate/intermediate.html?nombre=${encodeURIComponent(query)}`;
+    }
+}
+
+// Escuchar evento del formulario de búsqueda
+document.getElementById("search-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    buscarCancion();
 });

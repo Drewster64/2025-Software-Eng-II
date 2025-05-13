@@ -45,11 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
 // INICIO DE SESIÓN (REDIRIGE AL INDEX)
 document.getElementById("login-btn").addEventListener("click", async () => {
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
+
+  localStorage.setItem("loggedInUser",email);
 
   try {
     await signInWithEmailAndPassword(auth, email, password);

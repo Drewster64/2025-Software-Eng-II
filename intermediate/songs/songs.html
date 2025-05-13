@@ -10,6 +10,8 @@
     <!-- Bootstrap Icons para el sistema de estrellas -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
     <link rel="stylesheet" href="../../styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
       /* Estilos para el sistema de calificación por estrellas */
       .bi-star {
@@ -25,7 +27,37 @@
   <body class="page">
     <!-- Contenedor de la canción -->
     <div class="container-fluid text-center mt-5 rounded content">
-      <h1 id="titulo-cancion" class="mb-4 fw-bolder"></h1>
+      <nav class="navbar navbar-expand-lg navbar-light navcolor fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/home.html">
+                    <img class="rounded" src="/images/logo1.webp" alt="Bootstrap" width="80" height="80">
+                </a>
+                <a class="navbar-brand bi bi-chevron-double-up text" href="#home"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                    <div class="navbar-nav">
+                        <a class="nav-link active" aria-current="page" href="/home.html"><b><h4 class="text-dark fw-bolder">Home</h4></b></a>
+                        <a class="nav-link" href="#review"><b><h4 class="text-dark fw-bolder">Reseñas</h4></b></a>
+                        <a class="nav-link" href="#song"><b><h4 class="text-dark fw-bolder">Canción</h4></b></a>
+                        <div class="d-flex flex-column align-items-center w-100 mt-3">
+                            <form id="search-form" class="d-flex align-items-center mb-2" role="search">
+                              <input type="search" id="search-input" class="form-control me-2" placeholder="Busca una canción..." required>
+                              <button class="btn btn-info" type="submit"><i class="bi bi-search"></i></button>
+                            </form>  
+                            <button id="logout-btn" class="btn btn-danger btn-sm w-auto">
+                              <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </button>
+                          </div>                 
+                   
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <section id="song" class="padding-top:100px;">
+
+      <h1 id="titulo-cancion" class="mb-4 fw-bolder "></h1>
       <img id="cover-cancion" class="img-fluid rounded shadow" style="max-height: 400px;" alt="Cover de la canción" />
 
       <!-- Sistema de calificación con estrellas -->
@@ -39,6 +71,9 @@
           <span class="bi bi-star" data-index="4"></span>
         </div>
       </div>
+        </section>
+
+      <section id="review"></section>
 
       <!-- Sección para mostrar el promedio de calificación --> 
       <div class="mt-4">
@@ -51,6 +86,7 @@
     </div>
 
     <!-- Sección de reseñas -->
+     
     <div class="card mt-4">
       <div class="card-header">
         <h1>Haz una reseña</h1>
