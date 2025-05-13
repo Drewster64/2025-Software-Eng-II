@@ -1,52 +1,87 @@
+<!--Frankenstein V1-->
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Canción</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-  <link rel="stylesheet" href="../../styles.css" />
-  <style>
-    .bi-star {
-      font-size: 30px;
-      color: #ccc;
-      cursor: pointer;
-    }
-    .bi-star-fill {
-      color: gold;
-    }
-  </style>
-</head>
-<body class="page">
-  <div class="container-fluid text-center mt-5 rounded content">
-    <h1 id="titulo-cancion" class="mb-4 fw-bolder"></h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canción</title>
+     <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons para el sistema de estrellas -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <style>
+      /* Estilos para el sistema de calificación por estrellas */
+      .bi-star {
+        font-size: 30px;
+        color: #ccc;
+        cursor: pointer;
+      }
+      .bi-star-fill {
+        color: gold;
+      }
+    </style>
+  </head>
+  <body class="page">
+    <!-- Contenedor de la canción -->
+    <div class="container-fluid text-center mt-5 rounded content">
+      <h1 id="titulo-cancion" class="mb-4 fw-bolder"></h1>
+      <img id="cover-cancion" class="img-fluid rounded shadow" style="max-height: 400px;" alt="Cover de la canción" />
 
-    <img id="cover-cancion" class="img-fluid rounded shadow" style="max-height: 400px;" alt="Cover de la canción" />
-
-    <!-- Sistema de Reseñas con Estrellas -->
-    <div id="rating-container" class="mt-4">
-      <h3>Califica esta canción:</h3>
-      <div id="estrellas" class="mb-3">
-        <span class="bi bi-star" data-index="0"></span>
-        <span class="bi bi-star" data-index="1"></span>
-        <span class="bi bi-star" data-index="2"></span>
-        <span class="bi bi-star" data-index="3"></span>
-        <span class="bi bi-star" data-index="4"></span>
+      <!-- Sistema de calificación con estrellas -->
+      <div id="rating-container" class="mt-4">
+        <h3>Califica esta canción:</h3>
+        <div id="estrellas" class="mb-3">
+          <span class="bi bi-star" data-index="0"></span>
+          <span class="bi bi-star" data-index="1"></span>
+          <span class="bi bi-star" data-index="2"></span>
+          <span class="bi bi-star" data-index="3"></span>
+          <span class="bi bi-star" data-index="4"></span>
+        </div>
       </div>
-      <button id="submit-rating" class="btn btn-primary">Enviar Estrellas</button>
+
+      <!-- Sección para mostrar el promedio de calificación --> 
+      <div class="mt-4">
+        <h4>
+          Promedio de Calificación:
+          <span id="average-rating">Cargando...</span>
+          <i class="bi bi-star-fill text-warning"></i>
+        </h4>
+      </div>
     </div>
 
-    <!-- Promedio de calificación -->
-    <div class="mt-4">
-      <h4>
-        Promedio de Calificación: 
-        <span id="average-rating">Cargando...</span> 
-        <i class="bi bi-star-fill text-warning"></i>
-      </h4>
+    <!-- Sección de reseñas -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <h1>Haz una reseña</h1>
+      </div>
+      <div class="card-body">
+        <form id="review-form" class="row g-3">
+          <div class="col-md-4">
+            <input type="text" id="reviewer-name" class="form-control" placeholder="Tu nombre" readonly />
+          </div>
+          <div class="col-md-5">
+            <input type="text" id="review-text" class="form-control" placeholder="Tu reseña" required />
+          </div>
+          <div class="col-md-1">
+            <button type="submit" id="submit-rating" class="btn btn-success w-100">Enviar</button>
+          </div>
+        </form>
+        <div id="reviews-container" class="mt-4">
+          <h3>Reseñas</h3>
+          <!-- Aquí se cargarán las reseñas existentes -->
+        </div>
+      </div>
     </div>
-  </div>
 
-  <script type="module" src="./song.js"></script>
-</body>
-</html>
+    <script>
+      // Aseguramos que el nombre del usuario asignado en localStorage se refleje en el input correspondiente.
+      const user = localStorage.getItem("loggedInUser");
+      document.getElementById("reviewer-name").value = user || "";
+    </script>
+    <!-- Importamos el módulo de JavaScript que gestiona la canción, las reseñas y la calificación -->
+    <script type="module" src="./song.js"></script>
+  </body>
+</html> 
+
+

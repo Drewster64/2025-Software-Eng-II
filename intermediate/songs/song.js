@@ -1,5 +1,21 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, query, getDocs, setDoc, updateDoc, where, increment, arrayRemove, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  setDoc,
+  updateDoc,
+  orderBy,
+  increment,
+  arrayRemove,
+  arrayUnion,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -15,18 +31,57 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Obtener el nombre de la canción desde la URL
+// Obtener el nombre de la canción desde la URL y convertirlo a minúsculas
 const urlParams = new URLSearchParams(window.location.search);
-const nombreCancion = urlParams.get("nombre")?.toLowerCase(); // Convertimos a minúsculas
+const nombreCancion = urlParams.get("nombre")?.toLowerCase();
+console.log("nombreCancion obtenido:", nombreCancion);
 
 // Variables globales
-let songId = ""; // Para almacenar el ID de la canción
-let userId = "currentUser"; // Reemplaza esto con el sistema de autenticación que estés usando
+let songId = "";
+let userId = "currentUser";
 
-// Función para mostrar la información de la canción
+// Función para mostrar mensajes de error
+function mostrarError(mensaje) {
+  document.getElementById("titulo-cancion").innerHTML = mensaje;
+  document.getElementById("cover-cancion").src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+}
+
+// Función para obtener el cover de la canción
+async function obtenerCoverCancion(cancion) {
+  // 1. Intentar con el cover directo de la canción
+  if (cancion.cover && cancion.cover.trim() !== "") {
+    console.log("Usando cover directo de la canción:", cancion.cover);
+    return cancion.cover;
+  }
+
+  // 2. Intentar con el álbum
+  if (cancion.albumId) {
+    try {
+      console.log("Buscando cover en álbum con ID:", cancion.albumId);
+      const albumRef = doc(db, "album", cancion.albumId.trim());
+      const albumSnap = await getDoc(albumRef);
+      
+      if (albumSnap.exists()) {
+        const albumData = albumSnap.data();
+        if (albumData.cover && albumData.cover.trim() !== "") {
+          console.log("Usando cover del álbum:", albumData.cover);
+          return albumData.cover;
+        }
+      }
+    } catch (error) {
+      console.error("Error al obtener cover del álbum:", error);
+    }
+  }
+
+  // 3. Usar imagen por defecto
+  console.log("Usando imagen por defecto para el cover");
+  return "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+}
+
+// Muestra la canción y guarda el ID de la misma
 async function mostrarCancion() {
   if (!nombreCancion) {
-    document.getElementById("titulo-cancion").innerHTML = "No se proporcionó un nombre de canción.";
+    mostrarError("No se proporcionó un nombre de canción.");
     return;
   }
 
@@ -37,104 +92,149 @@ async function mostrarCancion() {
     const cancionesSnap = await getDocs(q);
 
     if (cancionesSnap.empty) {
-      document.getElementById("titulo-cancion").innerHTML = "Canción no encontrada.";
-      document.getElementById("cover-cancion").src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+      mostrarError("Canción no encontrada.");
       return;
     }
 
     let cancionEncontrada = null;
-
-    cancionesSnap.forEach((doc) => {
-      const data = doc.data();
+    cancionesSnap.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
       if (data.title?.toLowerCase() === nombreCancion) {
-        cancionEncontrada = { id: doc.id, ...data };
-        songId = doc.id; // Guardamos el ID de la canción
+        cancionEncontrada = { id: docSnapshot.id, ...data };
+        songId = docSnapshot.id;
       }
     });
 
-    if (cancionEncontrada) {
-      let coverFinal = cancionEncontrada.cover;
-
-      if (!coverFinal || coverFinal.trim() === "") {
-        const albumId = cancionEncontrada.albumId;
-        if (albumId) {
-          const albumRef = doc(db, "album", albumId.trim());
-          const albumSnap = await getDoc(albumRef);
-          if (albumSnap.exists()) {
-            const albumData = albumSnap.data();
-            coverFinal = albumData.cover;
-          }
-        }
-      }
-
-      if (!coverFinal || coverFinal.trim() === "") {
-        coverFinal = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
-      }
-
-      document.getElementById("titulo-cancion").innerHTML = cancionEncontrada.title;
-      document.getElementById("cover-cancion").src = coverFinal;
-    } else {
-      document.getElementById("titulo-cancion").innerHTML = "Canción no encontrada.";
-      document.getElementById("cover-cancion").src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+    if (!cancionEncontrada) {
+      mostrarError("Canción no encontrada.");
+      return;
     }
+
+    // Obtener el cover
+    const coverFinal = await obtenerCoverCancion(cancionEncontrada);
+
+    // Mostrar la información
+    document.getElementById("titulo-cancion").innerHTML = cancionEncontrada.title;
+    const coverElement = document.getElementById("cover-cancion");
+    coverElement.src = coverFinal;
+    
+    // Manejar errores de carga de imagen
+    coverElement.onerror = () => {
+      console.error("Error al cargar la imagen del cover, usando imagen por defecto");
+      coverElement.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+    };
 
     // Cargar la calificación promedio
     cargarPromedioCalificacion();
   } catch (error) {
     console.error("❌ Error al consultar Firestore:", error);
-    document.getElementById("titulo-cancion").innerHTML = "Error al cargar la canción.";
-    document.getElementById("cover-cancion").src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
+    mostrarError("Error al cargar la canción.");
   }
 }
 
-// Función para cargar el promedio de calificación
-async function cargarPromedioCalificacion() {
-  const starsRef = collection(db, "stars");
-  const q = query(starsRef, where("songId", "==", songId));
+// Carga las reseñas desde Firestore
+async function loadReviews() {
+  const reviewsContainer = document.getElementById("reviews-container");
+  reviewsContainer.innerHTML = "";
+  const header = document.createElement("h3");
+  header.textContent = "Reseñas";
+  reviewsContainer.appendChild(header);
 
   try {
-    const starsSnap = await getDocs(q);
-    const ratings = [];
+    const reviewsRef = collection(db, "reviews");
+    const reviewsQuery = query(
+      reviewsRef,
+      where("track", "==", nombreCancion),
+      orderBy("timestamp", "desc")
+    );
+    const querySnapshot = await getDocs(reviewsQuery);
+    console.log("Cantidad de reseñas encontradas:", querySnapshot.size);
 
-    starsSnap.forEach((doc) => {
-      const data = doc.data();
-      ratings.push(data.rating); // Almacenamos todas las calificaciones
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+      const card = document.createElement("div");
+      card.className = "card mt-2";
+
+      let timeStr = "";
+      if (data.timestamp) {
+        if (data.timestamp.seconds) {
+          timeStr = new Date(data.timestamp.seconds * 1000).toLocaleString();
+        } else {
+          timeStr = new Date(data.timestamp).toLocaleString();
+        }
+      }
+
+      card.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title">${data.name} ${data.rating ? "⭐".repeat(data.rating) : ""}</h5>
+          <p class="card-text">${data.review}</p>
+          <small class="text-muted">${timeStr}</small>
+        </div>
+      `;
+      reviewsContainer.appendChild(card);
     });
-
-    if (ratings.length > 0) {
-      const sum = ratings.reduce((acc, rating) => acc + rating, 0);
-      const average = sum / ratings.length;
-      document.getElementById("average-rating").innerText = average.toFixed(1); // Mostrar el promedio en 1 decimal
-    } else {
-      document.getElementById("average-rating").innerText = "Sin calificaciones";
-    }
   } catch (error) {
-    console.error("❌ Error al cargar el promedio de calificación:", error);
-    document.getElementById("average-rating").innerText = "Error al cargar promedio";
+    console.error("Error al cargar las reseñas:", error);
+    reviewsContainer.insertAdjacentHTML("beforeend", "<p>Error al cargar las reseñas.</p>");
   }
 }
 
-// Función para guardar la calificación de estrellas
-document.getElementById("estrellas").addEventListener("click", (e) => {
-  if (e.target.classList.contains("bi-star")) {
-    const stars = Array.from(document.querySelectorAll(".bi-star"));
-    const index = parseInt(e.target.getAttribute("data-index"));
+// Envío de la reseña
+document.getElementById("review-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("reviewer-name").value.trim();
+  const review = document.getElementById("review-text").value.trim();
+  const rating = window.selectedRating;
 
-    // Resaltar las estrellas hasta el índice seleccionado
-    stars.forEach((star, i) => {
-      if (i <= index) {
-        star.classList.add("bi-star-fill"); // Cambiar a estrella llena
-      } else {
-        star.classList.remove("bi-star-fill"); // Quitar estrella llena
-      }
+  if (!name || !review || !rating) {
+    alert("Por favor, completa la reseña y selecciona una calificación.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "reviews"), {
+      track: nombreCancion,
+      name,
+      review,
+      rating,
+      timestamp: serverTimestamp()
     });
 
-    // Guardar la calificación en una variable
-    window.selectedRating = index + 1;  // Las estrellas son 1 a 5
+    document.getElementById("review-form").reset();
+    window.selectedRating = undefined;
+    const stars = document.querySelectorAll("#estrellas span");
+    stars.forEach(star => star.classList.remove("bi-star-fill"));
+
+    const user = localStorage.getItem("loggedInUser");
+    if (user) {
+      document.getElementById("reviewer-name").value = user;
+    }
+
+    loadReviews();
+  } catch (error) {
+    console.error("Error al enviar la reseña:", error);
   }
 });
 
-// Función para enviar la calificación al hacer clic en el botón
+// Manejo de estrellas para calificación
+document.getElementById("estrellas").addEventListener("click", (e) => {
+  if (e.target.classList.contains("bi-star")) {
+    const stars = Array.from(document.querySelectorAll("#estrellas span"));
+    const index = parseInt(e.target.getAttribute("data-index"));
+
+    stars.forEach((star, i) => {
+      if (i <= index) {
+        star.classList.add("bi-star-fill");
+      } else {
+        star.classList.remove("bi-star-fill");
+      }
+    });
+
+    window.selectedRating = index + 1;
+  }
+});
+
+// Envío de la calificación
 document.getElementById("submit-rating").addEventListener("click", async () => {
   if (!window.selectedRating) {
     alert("Por favor, selecciona una calificación.");
@@ -142,32 +242,26 @@ document.getElementById("submit-rating").addEventListener("click", async () => {
   }
 
   try {
-    // Verificar si el usuario ya tiene una calificación para esta canción
     const starsRef = collection(db, "stars");
     const q = query(starsRef, where("songId", "==", songId), where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      // Si el usuario ya tiene una calificación, actualizamos en lugar de añadir una nueva
-      const docId = querySnapshot.docs[0].id; // Obtenemos el ID del documento
-
+      const docId = querySnapshot.docs[0].id;
       const docRef = doc(db, "stars", docId);
-      const oldRating = querySnapshot.docs[0].data().rating; // Obtenemos la calificación anterior
+      const oldRating = querySnapshot.docs[0].data().rating;
 
-      // Actualizamos el documento con la nueva calificación
       await updateDoc(docRef, {
         rating: window.selectedRating,
-        timestamp: new Date(),
+        timestamp: new Date()
       });
 
-      // Actualizar la calificación promedio (restar la calificación anterior y sumar la nueva)
       await updateDoc(doc(db, "songs", songId), {
-        averageRating: increment(window.selectedRating - oldRating), // Restar la calificación anterior y sumar la nueva
+        averageRating: increment(window.selectedRating - oldRating)
       });
 
       alert("¡Gracias por actualizar tu calificación!");
     } else {
-      // Si el usuario no tiene una calificación previa, la creamos
       const docRef = doc(db, "stars", `${songId}-${userId}`);
       await setDoc(docRef, {
         songId: songId,
@@ -176,15 +270,13 @@ document.getElementById("submit-rating").addEventListener("click", async () => {
         timestamp: new Date(),
       });
 
-      // Actualizar la calificación promedio
       await updateDoc(doc(db, "songs", songId), {
-        averageRating: increment(window.selectedRating),
+        averageRating: increment(window.selectedRating)
       });
 
       alert("¡Gracias por tu calificación!");
     }
 
-    // Actualizamos el promedio de calificación
     cargarPromedioCalificacion();
   } catch (error) {
     console.error("❌ Error al guardar la calificación:", error);
@@ -192,5 +284,43 @@ document.getElementById("submit-rating").addEventListener("click", async () => {
   }
 });
 
-// Ejecutar al cargar la página
-document.addEventListener("DOMContentLoaded", mostrarCancion);
+// Carga el promedio de calificación
+async function cargarPromedioCalificacion() {
+  const starsRef = collection(db, "stars");
+  const q = query(starsRef, where("songId", "==", songId));
+
+  try {
+    const starsSnap = await getDocs(q);
+    const ratings = [];
+    starsSnap.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+      ratings.push(data.rating);
+    });
+
+    const averageRatingElement = document.getElementById("average-rating");
+    if (ratings.length > 0) {
+      const sum = ratings.reduce((acc, rating) => acc + rating, 0);
+      const average = sum / ratings.length;
+      averageRatingElement.innerText = average.toFixed(1);
+    } else {
+      averageRatingElement.innerText = "Sin calificaciones";
+    }
+  } catch (error) {
+    console.error("❌ Error al cargar el promedio de calificación:", error);
+    document.getElementById("average-rating").innerText = "Error al cargar promedio";
+  }
+}
+
+// Inicialización
+document.addEventListener("DOMContentLoaded", () => {
+  mostrarCancion();
+  if (nombreCancion) {
+    loadReviews();
+  }
+
+  // Cargar nombre de usuario si está logueado
+  const user = localStorage.getItem("loggedInUser");
+  if (user) {
+    document.getElementById("reviewer-name").value = user;
+  }
+});
