@@ -14,18 +14,13 @@
       <script>
   function redirigirAHome() {
     const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-    const pathParts = window.location.pathname.split("/");
-
-    // Si estás en GitHub Pages, el nombre del repositorio es la segunda parte del pathname.
-    const repoName = pathParts[1]; // Ej: '2025-Software-Eng-II'
-
     const homePath = isLocal
       ? "/home.html"
-      : `/${repoName}/home.html`;
+      : "/2025-Software-Eng-II/home.html";
 
     window.location.href = homePath;
-  }   
-    </script>
+  }
+</script>
 
     <style>
       /* Estilos para el sistema de calificación por estrellas */
