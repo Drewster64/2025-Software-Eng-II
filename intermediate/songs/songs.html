@@ -32,15 +32,25 @@
                 <a class="navbar-brand" href="/home.html">
                     <img class="rounded" src="./images/logo1.webp" alt="Bootstrap" width="80" height="80">
                 </a>
-                <a class="navbar-brand bi bi-chevron-double-up text" href="#home"></a>
+                <a class="navbar-brand text" href="#home"></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
-                        <a class="nav-link active" aria-current="page" href="../../home.html"><b><h4 class="text-dark fw-bolder">Home</h4></b></a>
-                        <a class="nav-link" href="#review"><b><h4 class="text-dark fw-bolder">Reseñas</h4></b></a>
-                        <a class="nav-link" href="#song"><b><h4 class="text-dark fw-bolder">Canción</h4></b></a>
+
+                       <a class="nav-link active d-flex align-items-center gap-2" aria-current="page" href="../../home.html">
+                      <i class="bi bi-house-door-fill text-dark"></i>
+                      <span class="text-dark fw-bolder">Home</span>
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="#review">
+                      <i class="bi bi-star-half text-dark"></i>
+                      <span class="text-dark fw-bolder">Reseñas</span>
+                    </a>
+                    <a class="nav-link d-flex align-items-center gap-2" href="#song">
+                      <i class="bi bi-vinyl text-dark"></i>
+                      <span class="text-dark fw-bolder">Canción</span>
+                    </a>
                         <div class="d-flex flex-column align-items-center w-100 mt-3">
                             <form id="search-form" class="d-flex align-items-center mb-2" role="search">
                               <input type="search" id="search-input" class="form-control me-2" placeholder="Busca una canción..." required>
