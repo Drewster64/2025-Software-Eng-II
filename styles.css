@@ -100,10 +100,10 @@ body.page {
 }
 .content {
   background-color: rgba(0, 0, 0, 0.6);
-  padding: 30px;
-  max-width: 600px;
+  padding: 50px;
+  max-width: 800px;
   margin: 100px auto;
-  border-radius: 12px;
+  border-radius: 13px;
 }
 .gallery {
   margin-top: 40px;

@@ -1,6 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, query, where, getDocs, addDoc, setDoc, updateDoc, orderBy, increment, arrayRemove, arrayUnion, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, doc, getDoc, query, where, getDocs, addDoc, setDoc, updateDoc, orderBy, increment, arrayRemove, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -23,7 +22,6 @@ console.log("nombreCancion obtenido:", nombreCancion);
 
 // Variables globales
 let songId = "";
-let userId = "currentUser";
 
 // Función para mostrar mensajes de error
 function mostrarError(mensaje) {
@@ -164,15 +162,68 @@ async function loadReviews() {
   }
 }
 
-// Envío de la reseña
+// Carga el promedio de calificación desde las reviews
+async function cargarPromedioCalificacion() {
+  const reviewsRef = collection(db, "reviews");
+  const q = query(reviewsRef, where("track", "==", nombreCancion));
+
+  try {
+    const reviewsSnap = await getDocs(q);
+    const ratings = [];
+    
+    reviewsSnap.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+      if (data.rating) {
+        ratings.push(data.rating);
+      }
+    });
+
+    const averageRatingElement = document.getElementById("average-rating");
+    if (ratings.length > 0) {
+      const sum = ratings.reduce((acc, rating) => acc + rating, 0);
+      const average = sum / ratings.length;
+      averageRatingElement.innerText = average.toFixed(1);
+    } else {
+      averageRatingElement.innerText = "Sin calificaciones";
+    }
+  } catch (error) {
+    console.error("❌ Error al cargar el promedio de calificación:", error);
+    document.getElementById("average-rating").innerText = "Error al cargar promedio";
+  }
+}
+
+// Manejo de estrellas para calificación
+document.getElementById("estrellas").addEventListener("click", (e) => {
+  if (e.target.classList.contains("bi-star")) {
+    const stars = Array.from(document.querySelectorAll("#estrellas span"));
+    const index = parseInt(e.target.getAttribute("data-index"));
+
+    stars.forEach((star, i) => {
+      if (i <= index) {
+        star.classList.add("bi-star-fill");
+      } else {
+        star.classList.remove("bi-star-fill");
+      }
+    });
+
+    window.selectedRating = index + 1;
+  }
+});
+
+// Envío de la reseña (que incluye la calificación)
 document.getElementById("review-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = document.getElementById("reviewer-name").value.trim();
   const review = document.getElementById("review-text").value.trim();
   const rating = window.selectedRating;
 
-  if (!name || !review || !rating) {
-    alert("Por favor, completa la reseña y selecciona una calificación.");
+  if (!name || !review) {
+    alert("Por favor, completa la reseña.");
+    return;
+  }
+
+  if (!rating) {
+    alert("Por favor, selecciona una calificación.");
     return;
   }
 
@@ -195,118 +246,14 @@ document.getElementById("review-form").addEventListener("submit", async (e) => {
       document.getElementById("reviewer-name").value = user;
     }
 
+    // Recargar reseñas y promedio
     loadReviews();
+    cargarPromedioCalificacion();
+    
+    alert("¡Gracias por tu reseña y calificación!");
   } catch (error) {
     console.error("Error al enviar la reseña:", error);
-  }
-});
-
-// Manejo de estrellas para calificación
-document.getElementById("estrellas").addEventListener("click", (e) => {
-  if (e.target.classList.contains("bi-star")) {
-    const stars = Array.from(document.querySelectorAll("#estrellas span"));
-    const index = parseInt(e.target.getAttribute("data-index"));
-
-    stars.forEach((star, i) => {
-      if (i <= index) {
-        star.classList.add("bi-star-fill");
-      } else {
-        star.classList.remove("bi-star-fill");
-      }
-    });
-
-    window.selectedRating = index + 1;
-  }
-});
-
-// Envío de la calificación
-document.getElementById("submit-rating").addEventListener("click", async () => {
-  if (!window.selectedRating) {
-    alert("Por favor, selecciona una calificación.");
-    return;
-  }
-
-  try {
-    const starsRef = collection(db, "stars");
-    const q = query(starsRef, where("songId", "==", songId), where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      const docId = querySnapshot.docs[0].id;
-      const docRef = doc(db, "stars", docId);
-      const oldRating = querySnapshot.docs[0].data().rating;
-
-      await updateDoc(docRef, {
-        rating: window.selectedRating,
-        timestamp: new Date()
-      });
-
-      await updateDoc(doc(db, "songs", songId), {
-        averageRating: increment(window.selectedRating - oldRating)
-      });
-
-      alert("¡Gracias por actualizar tu calificación!");
-    } else {
-      const docRef = doc(db, "stars", `${songId}-${userId}`);
-      await setDoc(docRef, {
-        songId: songId,
-        rating: window.selectedRating,
-        userId: userId,
-        timestamp: new Date(),
-      });
-
-      await updateDoc(doc(db, "songs", songId), {
-        averageRating: increment(window.selectedRating)
-      });
-
-      alert("¡Gracias por tu calificación!");
-    }
-
-    cargarPromedioCalificacion();
-  } catch (error) {
-    console.error("❌ Error al guardar la calificación:", error);
-    alert("Error al guardar la calificación. Intenta nuevamente.");
-  }
-});
-
-// Carga el promedio de calificación
-async function cargarPromedioCalificacion() {
-  const starsRef = collection(db, "stars");
-  const q = query(starsRef, where("songId", "==", songId));
-
-  try {
-    const starsSnap = await getDocs(q);
-    const ratings = [];
-    starsSnap.forEach((docSnapshot) => {
-      const data = docSnapshot.data();
-      ratings.push(data.rating);
-    });
-
-    const averageRatingElement = document.getElementById("average-rating");
-    if (ratings.length > 0) {
-      const sum = ratings.reduce((acc, rating) => acc + rating, 0);
-      const average = sum / ratings.length;
-      averageRatingElement.innerText = average.toFixed(1);
-    } else {
-      averageRatingElement.innerText = "Sin calificaciones";
-    }
-  } catch (error) {
-    console.error("❌ Error al cargar el promedio de calificación:", error);
-    document.getElementById("average-rating").innerText = "Error al cargar promedio";
-  }
-}
-
-// Inicialización
-document.addEventListener("DOMContentLoaded", () => {
-  mostrarCancion();
-  if (nombreCancion) {
-    loadReviews();
-  }
-
-  // Cargar nombre de usuario si está logueado
-  const user = localStorage.getItem("loggedInUser");
-  if (user) {
-    document.getElementById("reviewer-name").value = user;
+    alert("Error al enviar la reseña. Intenta nuevamente.");
   }
 });
 
@@ -332,5 +279,16 @@ document.getElementById("search-form").addEventListener("submit", function(e) {
     buscarCancion();
 });
 
+// Inicialización
+document.addEventListener("DOMContentLoaded", () => {
+  mostrarCancion();
+  if (nombreCancion) {
+    loadReviews();
+  }
 
-
+  // Cargar nombre de usuario si está logueado
+  const user = localStorage.getItem("loggedInUser");
+  if (user) {
+    document.getElementById("reviewer-name").value = user;
+  }
+});

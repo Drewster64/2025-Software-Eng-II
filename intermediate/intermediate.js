@@ -168,3 +168,24 @@ document.addEventListener("DOMContentLoaded", () => {
   mostrarCanciones();
   mostrarAlbumes();
 });
+// 🔍 Redirigir a intermediate.html con la búsqueda
+function buscarCancion() {
+    const searchInput = document.getElementById("search-input");
+    const query = searchInput.value.trim();
+
+    if (query) {
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.includes("/2025-Software-Eng-II")
+            ? "/2025-Software-Eng-II"
+            : "";
+
+        // Redirige a intermediate.html en vez de songs.html
+        window.location.href = `${basePath}/intermediate/intermediate.html?nombre=${encodeURIComponent(query)}`;
+    }
+}
+
+// Escuchar evento del formulario de búsqueda
+document.getElementById("search-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    buscarCancion();
+});

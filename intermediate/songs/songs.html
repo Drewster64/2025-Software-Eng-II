@@ -79,7 +79,7 @@
       </div>
         </section>
 
-      <section id="review"></section>
+      <section id="review">
 
       <!-- Sección para mostrar el promedio de calificación --> 
       <div class="mt-4">
@@ -93,28 +93,36 @@
 
     <!-- Sección de reseñas -->
      
-    <div class="card mt-4">
-      <div class="card-header">
-        <h1>Haz una reseña</h1>
+<div class="card mt-4 content">
+  <div class="card-header text-white">
+    <h1>Haz una reseña</h1>
+  </div>
+  <div class="card-body">
+    <form id="review-form" class="row g-3">
+      <div class="col-md-4">
+        <input type="text" id="reviewer-name" class="form-control" placeholder="Tu nombre" readonly />
       </div>
-      <div class="card-body">
-        <form id="review-form" class="row g-3">
-          <div class="col-md-4">
-            <input type="text" id="reviewer-name" class="form-control" placeholder="Tu nombre" readonly />
-          </div>
-          <div class="col-md-5">
-            <input type="text" id="review-text" class="form-control" placeholder="Tu reseña" required />
-          </div>
-          <div class="col-md-1">
-            <button type="submit" id="submit-rating" class="btn btn-success w-100">Enviar</button>
-          </div>
-        </form>
-        <div id="reviews-container" class="mt-4">
-          <h3>Reseñas</h3>
-          <!-- Aquí se cargarán las reseñas existentes -->
-        </div>
+      <div class="col-md-5">
+        <input type="text" id="review-text" class="form-control" placeholder="Tu reseña" required />
+      </div>
+      <div class="col-md-3 d-grid">
+        <button type="submit" id="submit-rating" class="btn btn-success w-200">Enviar</button>
+      </div>
+    </form>
+
+    <div class="overflow-auto mt-4" style="max-height: 300px;">
+      <div id="reviews-container" class="text-white">
+        <h3>Reseñas</h3>
       </div>
     </div>
+
+  </div>
+  <footer class="text-white">
+    <h3>Track By Track - 2025<br><i class="bi bi-badge-tm"></i></h3>
+  </footer>
+</div>
+  </section>
+
 
     <script>
       // Aseguramos que el nombre del usuario asignado en localStorage se refleje en el input correspondiente.

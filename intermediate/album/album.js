@@ -1,167 +1,220 @@
-// Importamos los módulos necesarios de Firebase
+/* Versión con utilidades Bootstrap para scroll compacto */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyC8OziYZn9iiiIH19SfXf1tw6UOoYA1apA",
   authDomain: "try1-8c82b.firebaseapp.com",
   projectId: "try1-8c82b",
   storageBucket: "try1-8c82b.appspot.com",
   messagingSenderId: "722840528217",
-  appId: "1:722840528217:web:85547781c2230e8b1d5848"
+  appId: "1:722840528217:web:85547781c2230e8b1d5848",
 };
 
-// Inicializar Firebase con la configuración proporcionada
 const app = initializeApp(firebaseConfig);
-// Obtener una instancia de Firestore
-const db = getFirestore(app);
+const db  = getFirestore(app);
 
-// Obtener el nombre del álbum desde la URL, se usa para buscar el álbum específico
-const params = new URLSearchParams(window.location.search);
-const nombreAlbum = params.get("nombre")?.toLowerCase() || "";
+// 2. Parámetro de la URL: nombre del álbum
+const params       = new URLSearchParams(window.location.search);
+const nombreAlbum  = params.get("nombre")?.toLowerCase() || "";
 
-// Función que carga la información del álbum desde Firestore
+// 3. Carga de información del álbum
 async function cargarAlbum() {
-  // Referencia a la colección 'album' en Firestore
   const albumesRef = collection(db, "album");
-  // Obtener todos los documentos de la colección
-  const snapshot = await getDocs(albumesRef);
-
-  // Referencia al contenedor donde se mostrará el álbum
+  const snapshot   = await getDocs(albumesRef);
   const contenedor = document.getElementById("album-container");
-  contenedor.innerHTML = ""; // Limpiar el contenedor antes de agregar contenido
+  contenedor.innerHTML = "";
 
-  let encontrado = false; // Variable para verificar si el álbum existe
+  let albumEncontrado = false;
 
-  // Iterar sobre todos los documentos en la colección de álbumes
   snapshot.forEach((docSnap) => {
-    const album = docSnap.data();
+    const album            = docSnap.data();
+    const albumTitleLower  = album.title?.toLowerCase() || "";
 
-    // Convertir el título del álbum a minúsculas para la comparación
-    const albumTitleLower = album.title?.toLowerCase() || "";
-    
-    // Verificar si el título del álbum coincide con el nombre pasado en la URL
     if (albumTitleLower === nombreAlbum) {
-      encontrado = true; // Marcar como encontrado
+      albumEncontrado = true;
+      const albumId   = docSnap.id;
 
-      // Obtener el ID del álbum, necesario para obtener las canciones
-      const albumId = docSnap.id;
+      const coverUrl =
+        album.cover?.trim() ||
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png";
 
-      // Obtener la URL de la portada del álbum, si no tiene, usar una imagen por defecto
-      const coverUrl = album.cover && album.cover.trim() !== "" 
-                      ? album.cover 
-                      : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/480px-No_image_available.svg.png';
+      const descripcion =
+        album.info || album.description || "Sin descripción disponible.";
 
-      // Descripción del álbum
-      const descripcion = album.info || album.description || album.descripcion || "Sin descripción disponible.";
-
-      // Crear una card HTML para mostrar la información del álbum
+      // Tarjeta del álbum
       const card = document.createElement("div");
-      card.className = "text-center m-3"; // Clase de estilo
-
-      // Estructura HTML de la card que incluye la portada, el título, la calificación y la descripción
+      card.className = "text-center m-3";
       card.innerHTML = `
         <div class="d-flex flex-column align-items-center">
-          <img 
-            src="${coverUrl}" 
-            alt="${album.title}" 
-            class="img-fluid rounded shadow mb-3" 
-            style="max-width: 300px; cursor: pointer;"
-            onclick="window.location.href='/intermediate/album/album.html?nombre=${encodeURIComponent(album.title)}'"
-          >
+          <img src="${coverUrl}" alt="${album.title}"
+               class="img-fluid rounded shadow mb-3" style="max-width: 300px;">
           <h2 class="fw-bold text-white">${album.title}</h2>
-          <div id="rating-container" class="d-flex justify-content-center align-items-center gap-2 mt-3">
-            <span id="album-rating" class="text-white fs-4">Calculando...</span>
-            <i class="bi bi-star-fill" style="color: gold; font-size: 24px;"></i>
+
+          <!-- Promedio de estrellas -->
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="album-rating fs-4 text-white">0.0</span>
+            <i class="bi bi-star-fill" style="color:gold;font-size:24px;"></i>
           </div>
+
           <p class="text-white mt-2 text-center">${descripcion}</p>
         </div>
       `;
-
-      // Agregar la card al contenedor
       contenedor.appendChild(card);
 
-      // Llamar a la función para obtener las canciones del álbum
-      obtenerCancionesDelAlbum(albumId);
+      // Cargar reseñas y promedio
+      cargarReseñasAlbum(albumId);
+      calcularPromedioAlbum(albumId, card);
     }
   });
 
-  // Si no se encuentra el álbum, mostrar un mensaje
-  if (!encontrado) {
-    const noEncontrado = document.createElement("h3");
-    noEncontrado.className = "text-white text-center";
-    noEncontrado.textContent = "Álbum no encontrado.";
-    contenedor.appendChild(noEncontrado);
+  if (!albumEncontrado) {
+    contenedor.innerHTML =
+      `<h3 class="text-dark text-center">Álbum no encontrado.</h3>`;
   }
 }
 
-// Función para obtener las canciones del álbum y calcular el promedio de calificación
-async function obtenerCancionesDelAlbum(albumId) {
-  // Referencia a la colección 'songs' en Firestore
-  const cancionesRef = collection(db, "songs");
-  // Realizar una consulta para obtener las canciones del álbum específico
-  const q = query(cancionesRef, where("albumId", "==", albumId));
-  
-  try {
-    // Obtener las canciones que coinciden con el álbum
-    const cancionesSnap = await getDocs(q);
-    let totalRating = 0; // Variable para acumular las calificaciones
-    let totalCanciones = 0; // Variable para contar cuántas canciones tienen calificación
+// ─────────────────────────────────────────────────────────────
+// 4. Carga y mostrado de reseñas por canción
+// ─────────────────────────────────────────────────────────────
+async function cargarReseñasAlbum(albumId) {
+  const reviewsContainer = document.getElementById("reviews-container");
+  reviewsContainer.innerHTML =
+    "<h3 class='text-center text-dark'>Reseñas del álbum</h3>";
 
-    // Iterar sobre todas las canciones del álbum
+  try {
+    // Canciones del álbum
+    const cancionesQuery = query(
+      collection(db, "songs"),
+      where("albumId", "==", albumId)
+    );
+    const cancionesSnap = await getDocs(cancionesQuery);
+
+    if (cancionesSnap.empty) {
+      reviewsContainer.innerHTML +=
+        "<p class='text-center text-dark'>No hay canciones asociadas a este álbum.</p>";
+      return;
+    }
+
+    // Para cada canción, obtener reseñas
     for (const doc of cancionesSnap.docs) {
       const cancion = doc.data();
-      const songId = doc.id;
 
-      // Referencia a la colección 'stars' para obtener las calificaciones de cada canción
-      const starsRef = collection(db, "stars");
-      const starQuery = query(starsRef, where("songId", "==", songId));
-      const starSnap = await getDocs(starQuery);
+      const reviewsQuery = query(
+        collection(db, "reviews"),
+        where("track", "==", cancion.title.toLowerCase()),
+        orderBy("timestamp", "desc")
+      );
+      const reviewsSnap = await getDocs(reviewsQuery);
 
-      // Obtener todas las calificaciones de la canción
-      const ratings = starSnap.docs.map(doc => doc.data().rating);
-      
-      // Si la canción tiene calificaciones, calcular el promedio
-      if (ratings.length > 0) {
-        const sum = ratings.reduce((acc, rating) => acc + rating, 0);
-        const averageRating = sum / ratings.length;
-        totalRating += averageRating; // Acumular el promedio de calificación
-        totalCanciones++; // Incrementar el contador de canciones calificadas
+      if (!reviewsSnap.empty) {
+        // Sección por canción
+        const songSection = document.createElement("div");
+        songSection.className = "card bg-light text-dark mt-3 p-2";
+
+        // Cabecera con el título de la canción
+        songSection.innerHTML = `
+          <h4 class="card-header bg-light text-dark mb-2">${cancion.title}</h4>
+          <!-- Contenedor de reseñas con utilidades Bootstrap -->
+          <div class="overflow-auto p-2" style="max-height: 200px;"></div>
+        `;
+        const cardBody = songSection.querySelector(".overflow-auto");
+
+        // Rellenar reseñas
+        reviewsSnap.forEach((reviewDoc) => {
+          const review = reviewDoc.data();
+          cardBody.insertAdjacentHTML(
+            "beforeend",
+            `
+              <div class="card bg-light text-dark p-1 mb-2">
+                <h6 class="mb-1">${review.name} ${"⭐".repeat(review.rating)}</h6>
+                <p class="mb-1 small">${review.review}</p>
+                <small class="text-muted">${new Date(
+                  review.timestamp.seconds * 1000
+                ).toLocaleString()}</small>
+              </div>
+            `
+          );
+        });
+
+        reviewsContainer.appendChild(songSection);
+      }
+    }
+  } catch (error) {
+    console.error("Error al cargar las reseñas:", error);
+    reviewsContainer.innerHTML +=
+      "<p class='text-dark'>Error al cargar las reseñas del álbum.</p>";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 4-bis. Promedio de estrellas del álbum
+// ─────────────────────────────────────────────────────────────
+async function calcularPromedioAlbum(albumId, card) {
+  try {
+    const cancionesQ = query(
+      collection(db, "songs"),
+      where("albumId", "==", albumId)
+    );
+    const cancionesSnap = await getDocs(cancionesQ);
+
+    let acumulado = 0;
+    let cancionesConRating = 0;
+
+    for (const sDoc of cancionesSnap.docs) {
+      const songId   = sDoc.id;
+      const starsQ   = query(
+        collection(db, "stars"),
+        where("songId", "==", songId)
+      );
+      const starsSnap = await getDocs(starsQ);
+
+      const ratings = starsSnap.docs.map((d) => d.data().rating);
+      if (ratings.length) {
+        const avgSong = ratings.reduce((a, b) => a + b) / ratings.length;
+        acumulado += avgSong;
+        cancionesConRating++;
       }
     }
 
-    // Calcular el promedio del álbum
-    const promedioAlbum = totalCanciones > 0 ? totalRating / totalCanciones : 0;
-    // Mostrar el promedio de calificación en la interfaz
-    document.getElementById("album-rating").innerText = promedioAlbum.toFixed(1);
-  } catch (error) {
-    console.error("Error al calcular el promedio de calificación del álbum:", error);
-    // Si ocurre un error, mostrar "Error" en lugar de la calificación
-    document.getElementById("album-rating").innerText = "Error";
+    const promedio =
+      cancionesConRating ? acumulado / cancionesConRating : 0;
+    card.querySelector(".album-rating").textContent = promedio.toFixed(1);
+  } catch (err) {
+    console.error("Error promedio álbum:", err);
+    card.querySelector(".album-rating").textContent = "—";
   }
 }
 
-// Ejecutar la función cuando se carga la página
+// ─────────────────────────────────────────────────────────────
+// 5. Ejecutar al cargar la página
+// ─────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", cargarAlbum);
+
+// 🔍 Redirigir a intermediate.html con la búsqueda
 function buscarCancion() {
-    const searchInput = document.getElementById("search-input");
-    const query = searchInput.value.trim();
+  const searchInput = document.getElementById("search-input");
+  const queryTxt    = searchInput.value.trim();
 
-    if (query) {
-        const currentPath = window.location.pathname;
-        const basePath = currentPath.includes("/2025-Software-Eng-II")
-            ? "/2025-Software-Eng-II"
-            : "";
+  if (queryTxt) {
+    const currentPath = window.location.pathname;
+    const basePath =
+      currentPath.includes("/2025-Software-Eng-II") ? "/2025-Software-Eng-II" : "";
 
-        // Redirige a intermediate.html en vez de songs.html
-        window.location.href = `${basePath}/intermediate/intermediate.html?nombre=${encodeURIComponent(query)}`;
-    }
+    window.location.href =
+      `${basePath}/intermediate/intermediate.html?nombre=${encodeURIComponent(
+        queryTxt
+      )}`;
+  }
 }
 
-// Escuchar evento del formulario de búsqueda
-document.getElementById("search-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    buscarCancion();
-})
-
+document
+  .getElementById("search-form")
+  .addEventListener("submit", (e) => (e.preventDefault(), buscarCancion()));
