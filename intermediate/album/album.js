@@ -19,28 +19,28 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const db = getFirestore(app);
 
 // 2. Parámetro de la URL: nombre del álbum
-const params       = new URLSearchParams(window.location.search);
-const nombreAlbum  = params.get("nombre")?.toLowerCase() || "";
+const params = new URLSearchParams(window.location.search);
+const nombreAlbum = params.get("nombre")?.toLowerCase() || "";
 
 // 3. Carga de información del álbum
 async function cargarAlbum() {
   const albumesRef = collection(db, "album");
-  const snapshot   = await getDocs(albumesRef);
+  const snapshot = await getDocs(albumesRef);
   const contenedor = document.getElementById("album-container");
   contenedor.innerHTML = "";
 
   let albumEncontrado = false;
 
   snapshot.forEach((docSnap) => {
-    const album            = docSnap.data();
-    const albumTitleLower  = album.title?.toLowerCase() || "";
+    const album = docSnap.data();
+    const albumTitleLower = album.title?.toLowerCase() || "";
 
     if (albumTitleLower === nombreAlbum) {
       albumEncontrado = true;
-      const albumId   = docSnap.id;
+      const albumId = docSnap.id;
 
       const coverUrl =
         album.cover?.trim() ||
@@ -60,7 +60,7 @@ async function cargarAlbum() {
 
           <!-- Promedio de estrellas -->
           <div class="d-flex align-items-center gap-2 mb-2">
-            <span class="album-rating fs-4 text-white">0.0</span>
+            <span class="album-rating fs-4 text-white">Calculando...</span>
             <i class="bi bi-star-fill" style="color:gold;font-size:24px;"></i>
           </div>
 
@@ -81,9 +81,7 @@ async function cargarAlbum() {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // 4. Carga y mostrado de reseñas por canción
-// ─────────────────────────────────────────────────────────────
 async function cargarReseñasAlbum(albumId) {
   const reviewsContainer = document.getElementById("reviews-container");
   reviewsContainer.innerHTML =
@@ -122,7 +120,6 @@ async function cargarReseñasAlbum(albumId) {
         // Cabecera con el título de la canción
         songSection.innerHTML = `
           <h4 class="card-header bg-light text-dark mb-2">${cancion.title}</h4>
-          <!-- Contenedor de reseñas con utilidades Bootstrap -->
           <div class="overflow-auto p-2" style="max-height: 200px;"></div>
         `;
         const cardBody = songSection.querySelector(".overflow-auto");
@@ -154,54 +151,68 @@ async function cargarReseñasAlbum(albumId) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-// 4-bis. Promedio de estrellas del álbum
-// ─────────────────────────────────────────────────────────────
+// 4-bis. Promedio de estrellas del álbum (VERSIÓN CORREGIDA)
 async function calcularPromedioAlbum(albumId, card) {
   try {
-    const cancionesQ = query(
+    // 1. Obtener todas las canciones del álbum
+    const cancionesQuery = query(
       collection(db, "songs"),
       where("albumId", "==", albumId)
     );
-    const cancionesSnap = await getDocs(cancionesQ);
+    const cancionesSnap = await getDocs(cancionesQuery);
 
-    let acumulado = 0;
+    if (cancionesSnap.empty) {
+      card.querySelector(".album-rating").textContent = "0.0";
+      return;
+    }
+
+    let totalRating = 0;
     let cancionesConRating = 0;
 
-    for (const sDoc of cancionesSnap.docs) {
-      const songId   = sDoc.id;
-      const starsQ   = query(
-        collection(db, "stars"),
-        where("songId", "==", songId)
+    // 2. Para cada canción, calcular su promedio de reseñas
+    for (const cancionDoc of cancionesSnap.docs) {
+      const cancion = cancionDoc.data();
+      
+      // Obtener todas las reseñas de esta canción
+      const reviewsQuery = query(
+        collection(db, "reviews"),
+        where("track", "==", cancion.title.toLowerCase())
       );
-      const starsSnap = await getDocs(starsQ);
+      const reviewsSnap = await getDocs(reviewsQuery);
 
-      const ratings = starsSnap.docs.map((d) => d.data().rating);
-      if (ratings.length) {
-        const avgSong = ratings.reduce((a, b) => a + b) / ratings.length;
-        acumulado += avgSong;
+      if (!reviewsSnap.empty) {
+        // Calcular promedio de esta canción
+        let sumaRating = 0;
+        reviewsSnap.forEach(reviewDoc => {
+          sumaRating += reviewDoc.data().rating;
+        });
+        
+        const promedioCancion = sumaRating / reviewsSnap.size;
+        totalRating += promedioCancion;
         cancionesConRating++;
       }
     }
 
-    const promedio =
-      cancionesConRating ? acumulado / cancionesConRating : 0;
-    card.querySelector(".album-rating").textContent = promedio.toFixed(1);
-  } catch (err) {
-    console.error("Error promedio álbum:", err);
-    card.querySelector(".album-rating").textContent = "—";
+    // 3. Calcular promedio del álbum
+    if (cancionesConRating > 0) {
+      const promedioAlbum = totalRating / cancionesConRating;
+      card.querySelector(".album-rating").textContent = promedioAlbum.toFixed(1);
+    } else {
+      card.querySelector(".album-rating").textContent = "0.0";
+    }
+  } catch (error) {
+    console.error("Error al calcular promedio del álbum:", error);
+    card.querySelector(".album-rating").textContent = "Error";
   }
 }
 
-// ─────────────────────────────────────────────────────────────
 // 5. Ejecutar al cargar la página
-// ─────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", cargarAlbum);
 
 // 🔍 Redirigir a intermediate.html con la búsqueda
 function buscarCancion() {
   const searchInput = document.getElementById("search-input");
-  const queryTxt    = searchInput.value.trim();
+  const queryTxt = searchInput.value.trim();
 
   if (queryTxt) {
     const currentPath = window.location.pathname;
