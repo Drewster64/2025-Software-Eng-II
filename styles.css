@@ -92,30 +92,11 @@ body {
 body.page {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    url("https://w0.peakpx.com/wallpaper/710/985/HD-wallpaper-vinyl-disk-vinyl-music.jpg") no-repeat center center fixed;
+  background: url("https://w0.peakpx.com/wallpaper/710/985/HD-wallpaper-vinyl-disk-vinyl-music.jpg") no-repeat center center fixed;
   background-size: cover;
   color: white;
   text-align: center;
-  padding-top: 100px;
-  min-height: 100vh;
-  
-  /* Solución específica para Safari iOS */
-  @supports (-webkit-touch-callout: none) {
-    background-attachment: scroll;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-  }
-}
-
-/* Reset para navegadores desktop */
-@media (min-width: 1024px) {
-  body.page {
-    background-attachment: fixed !important;
-    position: static !important;
-  }
+  padding-top:100px;
 }
 .content {
   background-color: rgba(0, 0, 0, 0.6);
