@@ -4,6 +4,9 @@
 
 ---
 
+[📄 Ver presentación en PDF](./presentacion/Track_by_track_presentation%20(1).pdf)
+--- 
+
 ## 🚀 Funcionalidades
 
 ### 🔐 Autenticación de usuarios
