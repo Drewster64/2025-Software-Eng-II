@@ -94,3 +94,5 @@ Para sugerencias o reportes: [trackbytrack@ejemplo.com]
 ---
 
 © 2025 – Track by Track. Todos los derechos reservados.
+
+---
