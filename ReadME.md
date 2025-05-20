@@ -4,6 +4,9 @@
 
 ---
 
+[Ver vídeo de la presentación en YouTube](https://youtu.be/Lu1iUIWRasg)
+---
+
 [📄 Ver presentación en PDF](./presentacion/Track_by_track_presentation%20(1).pdf)
 --- 
 
