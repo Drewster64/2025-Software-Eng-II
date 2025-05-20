@@ -115,6 +115,7 @@ async function mostrarCancion() {
   }
 }
 
+// Reseñas - Benyahir
 // Carga las reseñas desde Firestore
 async function loadReviews() {
   const reviewsContainer = document.getElementById("reviews-container");
